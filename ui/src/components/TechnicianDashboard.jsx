@@ -1,6 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const TechnicianDashboard = () => {
+    const [assets, setAssets] = useState([]);
+
+    useEffect(() => {
+        fetchAssets();
+    }, []);
+
+    const fetchAssets = async () => {
+        try {
+            const response = await axios.get('/api/assets');
+            setAssets(response.data);
+        } catch (error) {
+            console.error('Error fetching assets:', error);
+        }
+    };
+
     return (
         <div className="bg-gray-100 min-h-screen">
             {/* Navbar */}
@@ -27,14 +44,14 @@ const TechnicianDashboard = () => {
             {/* Main Content */}
             <main className="container mx-auto py-6">
 
-                {/* Asset Details Form Button */}
+                {/* Add Asset Button */}
                 <div className="mb-4">
-                    <a href="/add-asset" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+                    <Link to="/add-asset" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
                         Add Asset Details
-                    </a>
+                    </Link>
                 </div>
 
-                {/* Placeholder for Form Data */}
+                {/* Asset Details Table */}
                 <section className="bg-gray-100 shadow-md rounded-lg p-4 mb-6">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">Asset Details</h2>
                     <div className="overflow-x-auto">
@@ -45,16 +62,25 @@ const TechnicianDashboard = () => {
                                     <th className="border border-gray-300 px-4 py-2">Name</th>
                                     <th className="border border-gray-300 px-4 py-2">Scheduled Date</th>
                                     <th className="border border-gray-300 px-4 py-2">Status</th>
-                                    {/* <th className="border border-gray-300 px-4 py-2">Location</th> */}
                                     <th className="border border-gray-300 px-4 py-2">Actions</th>
                                 </tr>
                             </thead>
-                            {/* Display Asset Details Here */}
-                            
+                            <tbody>
+                                {assets.map((asset) => (
+                                    <tr key={asset.assetId}>
+                                        <td className="border border-gray-300 px-4 py-2">{asset.assetId}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{asset.assetName}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{asset.scheduledDate}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{asset.status}</td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            <Link to={`/edit-asset/${asset.assetId}`} className="text-blue-600 hover:text-gray-900">Edit</Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </table>
                     </div>
                 </section>
-
             </main>
         </div>
     );

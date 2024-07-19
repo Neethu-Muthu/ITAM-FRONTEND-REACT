@@ -1,17 +1,40 @@
 import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const AddAssetForm = () => {
-    const [assetId, setAssetId] = useState('');
-    const [assetName, setAssetName] = useState('');
-    const [scheduledDate, setScheduledDate] = useState('');
-    const [status, setStatus] = useState('');
-    const [location, setLocation] = useState('');
+    const { assetId } = useParams();
+    const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Handle form submission logic here
-        console.log('Form submitted:', { assetId, assetName, scheduledDate, status, location });
-        // You can add further logic to save data or perform API calls here
+    const [formData, setFormData] = useState({
+        assetId: assetId || '',
+        assetName: '',
+        scheduledDate: '',
+        status: '',
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (assetId) {
+                // Update existing asset
+                await axios.put(`/api/assets/${assetId}`, formData);
+            } else {
+                // Add new asset
+                await axios.post('/api/assets', formData);
+            }
+            navigate('/technician-dashboard');
+        } catch (error) {
+            console.error('Error saving asset:', error);
+        }
     };
 
     return (
@@ -37,10 +60,11 @@ const AddAssetForm = () => {
                                 type="text"
                                 id="assetId"
                                 name="assetId"
-                                value={assetId}
-                                onChange={(e) => setAssetId(e.target.value)}
+                                value={formData.assetId}
+                                onChange={handleChange}
                                 className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:border-blue-500"
                                 required
+                                readOnly={!!assetId}
                             />
                         </div>
                         <div className="w-1/2">
@@ -49,10 +73,11 @@ const AddAssetForm = () => {
                                 type="text"
                                 id="assetName"
                                 name="assetName"
-                                value={assetName}
-                                onChange={(e) => setAssetName(e.target.value)}
+                                value={formData.assetName}
+                                onChange={handleChange}
                                 className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:border-blue-500"
                                 required
+                                readOnly={!!assetId}
                             />
                         </div>
                     </div>
@@ -63,8 +88,8 @@ const AddAssetForm = () => {
                                 type="date"
                                 id="scheduledDate"
                                 name="scheduledDate"
-                                value={scheduledDate}
-                                onChange={(e) => setScheduledDate(e.target.value)}
+                                value={formData.scheduledDate}
+                                onChange={handleChange}
                                 className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:border-blue-500"
                                 required
                             />
@@ -74,8 +99,8 @@ const AddAssetForm = () => {
                             <select
                                 id="status"
                                 name="status"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
+                                value={formData.status}
+                                onChange={handleChange}
                                 className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:border-blue-500"
                                 required
                             >
@@ -86,9 +111,6 @@ const AddAssetForm = () => {
                             </select>
                         </div>
                     </div>
-
-                    
-                    
                     <div className="flex justify-end mt-4">
                         <button
                             type="submit"
